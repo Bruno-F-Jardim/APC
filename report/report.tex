@@ -1,0 +1,54 @@
+\documentclass[acmlarge]{acmart}
+
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    Bib\TeX}}}
+
+\begin{document}
+
+\title{On the parallelization of a N-body simulation}
+
+\author{Alice}
+\email{alice@mail.com}
+\affiliation{
+  \institution{Universidade do Minho}
+  \city{Braga}
+  \country{Portugal}
+}
+\author{Bob}
+\email{bob@mail.com}
+\affiliation{
+  \institution{Universidade do Minho}
+  \city{Braga}
+  \country{Portugal}
+}
+\author{Charlie}
+\email{charlie@mail.com}
+\affiliation{
+  \institution{Universidade do Minho}
+  \city{Braga}
+  \country{Portugal}
+}
+
+\renewcommand{\shortauthors}{Alice et al.}
+
+
+\begin{abstract}
+  This report documents the parallelization techniques implemented on a N-body simulation. This was achieved through the OpenMP API. After carefully analyzing and tested different optimization locations, the resulting program had a xxx\% speedup compared to the original, sequential implementation. This result shows that physical, N-body simulations are an excellent target for parallel code optimizations. As even very simple optimization techniques are able to produce a huge speedup.
+\end{abstract}
+
+\keywords{Parallel, Parallelization, Code Optimization, Simulation, Physics Simulation, OpenMP}
+
+
+\maketitle
+
+\section{Introduction}
+
+With the gradual decline of Moore's Law, the time of swapping an older chip for a newer one and experiencing exponential speedups is coming to an end. This, in a sense, limits the computing power a certain problem can have to still be tractable. That is, if we were dealing with a single computing core on a machine.
+
+Fortunatly, that is not the case. Nowadays, even the simplest computers have multiple computing cores. Unfortunatly, this parallelism is often misused or even neglected, making the device, essentially, a single-core computer.
+
+
+
+\end{document}
+\endinput
