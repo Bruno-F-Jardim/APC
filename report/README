@@ -1,0 +1,3 @@
+Para compilar o artigo utilizar:
+
+latexmk -pdf report.tex
