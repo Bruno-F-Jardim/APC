@@ -1,0 +1,128 @@
+@article{Moore_Law,
+  author   = {Moore, G.E.},
+  journal  = {Proceedings of the IEEE},
+  title    = {Cramming More Components Onto Integrated Circuits},
+  year     = {1998},
+  volume   = {86},
+  number   = {1},
+  pages    = {82-85},
+  keywords = {Costs;Integrated circuit reliability;Integrated circuit technology;Space technology;Semiconductor films;Aerospace electronics;Portable computers;Home computing;Telephony;Switches},
+  doi      = {10.1109/JPROC.1998.658762}
+}
+
+
+@inproceedings{amdahl1967_parallel_speedup_limit,
+  title     = {Validity of the single processor approach to achieving large scale computing capabilities},
+  author    = {Gene M. Amdahl},
+  booktitle = {AFIPS '67 (Spring)},
+  year      = {1967},
+  url       = {https://api.semanticscholar.org/CorpusID:195607370}
+}
+
+
+@article{hill2008_amdahl_multicore_era,
+  author   = {Hill, Mark D. and Marty, Michael R.},
+  journal  = {Computer},
+  title    = {Amdahl's Law in the Multicore Era},
+  year     = {2008},
+  volume   = {41},
+  number   = {7},
+  pages    = {33-38},
+  keywords = {Multicore processing;Costs;Pipelines;Hardware;Roads;Energy management;Multiprocessor interconnection networks;Parallel processing;Equations;Computer architecture;Amdahl's law;multicore chips;chip multiprocessors (CMPs)},
+  doi      = {10.1109/MC.2008.209}
+}
+
+@article{gustafson1988_scaled_speedup,
+  author     = {Gustafson, John L.},
+  title      = {Reevaluating Amdahl's law},
+  year       = {1988},
+  issue_date = {May 1988},
+  publisher  = {Association for Computing Machinery},
+  address    = {New York, NY, USA},
+  volume     = {31},
+  number     = {5},
+  issn       = {0001-0782},
+  url        = {https://doi.org/10.1145/42411.42415},
+  doi        = {10.1145/42411.42415},
+  journal    = {Commun. ACM},
+  month      = may,
+  pages      = {532–533},
+  numpages   = {2}
+}
+
+
+
+@article{williams2009_roofline_model,
+  author     = {Williams, Samuel and Waterman, Andrew and Patterson, David},
+  title      = {Roofline: an insightful visual performance model for multicore architectures},
+  year       = {2009},
+  issue_date = {April 2009},
+  publisher  = {Association for Computing Machinery},
+  address    = {New York, NY, USA},
+  volume     = {52},
+  number     = {4},
+  issn       = {0001-0782},
+  url        = {https://doi.org/10.1145/1498765.1498785},
+  doi        = {10.1145/1498765.1498785},
+  abstract   = {The Roofline model offers insight on how to improve the performance of software and hardware.},
+  journal    = {Commun. ACM},
+  month      = apr,
+  pages      = {65–76},
+  numpages   = {12}
+}
+
+@inproceedings{sun1990_memory_bounded_speedup,
+  title    = {Scalable Problems and Memory-Bounded Speedup},
+  journal  = {Journal of Parallel and Distributed Computing},
+  volume   = {19},
+  number   = {1},
+  pages    = {27-37},
+  year     = {1993},
+  issn     = {0743-7315},
+  doi      = {https://doi.org/10.1006/jpdc.1993.1087},
+  url      = {https://www.sciencedirect.com/science/article/pii/S0743731583710877},
+  author   = {X.H. Sun and L.M. Ni},
+  abstract = {In this paper three models of parallel speedup are studied. They are fixed-size speedup, fixed-time speedup, and memory-bounded speedup. The latter two consider the relationship between speedup and problem scalability. Two sets of speedup formulations are derived for these three models. One set considers uneven workload allocation and communication overhead and gives more accurate estimation. Another set considers a simplified case and provides a clear picture on the impact of the sequential portion of an application on the possible performance gain from parallel processing. The simplified fixed-size speedup is Amdahl′s law. The simplified fixed-time speedup is Gustafson′s scaled speedup. The simplified memory-bounded speedup contains both Amdahl′s law and Gustafson′s scaled speedup as special cases. This study leads to a better understanding of parallel processing.}
+}
+}
+
+
+
+@misc{openmp_shared_memory_model,
+  title        = {OpenMP Application Programming Interface},
+  howpublished = {\url{https://www.openmp.org}},
+  year         = {2026},
+  note         = {Accessed 2026}
+}
+
+
+
+@article{kuzmin2024_parallel_treecode_nbody,
+  title     = {EFFICIENCY OF PARALLEL COMPUTATIONS OF GRAVITATIONAL FORCES BY TREECODE METHOD IN 𝑁-BODY MODELS},
+  volume    = {27},
+  issn      = {2587-6325},
+  url       = {http://dx.doi.org/10.15688/mpcm.jvolsu.2024.4.4},
+  doi       = {10.15688/mpcm.jvolsu.2024.4.4},
+  number    = {4},
+  journal   = {Mathematical Physics and Computer Simulation},
+  publisher = {Volgograd State University},
+  author    = {Kuzmin, Nikolay and Sirotin, Danila and Khoperskov, Alexander},
+  year      = {2024},
+  month     = dec,
+  pages     = {39–55}
+}
+
+
+@article{adaptive_tiling_cache_aware_nbody,
+  title    = {Adaptive tiling for parallel N-body simulations on many core},
+  journal  = {Astronomy and Computing},
+  volume   = {36},
+  pages    = {100466},
+  year     = {2021},
+  issn     = {2213-1337},
+  doi      = {https://doi.org/10.1016/j.ascom.2021.100466},
+  url      = {https://www.sciencedirect.com/science/article/pii/S2213133721000202},
+  author   = {M.A. Khan and M.A. Al-Mouhamed and N. Mohammad},
+  keywords = {N-body simulations, Tiling, Cache optimization, Many Integrated Core (MIC), Parallel programming},
+  abstract = {The N-body simulations consist of computing mutual gravitational forces exerted on each body in O(N). The Barnes–Hut approximation allows processing a group of bodies in O(1) if they are far enough from a given body, which drops the complexity of the whole simulation to O(NLogN). The octree is used to ease the pruning process but at the cost of some irregularity in the access pattern. In a parallel N-body implementation the bodies are partitioned among threads that are executed on multiple cores. The depth-first traversal of the octree is used for processing each body, which causes repeated cache misses during traversal. This paper proposes different types of tiling methods to improve the performance of N-body simulations. It presents an experimental analysis of octree traversal by using these tiling methods to identify the potential of cache data reuse. It then evaluates these tiling methods for varying tile sizes with different galaxy sizes and a varying number of threads on several machine architectures. The efficiency of tiling approaches depends on the chosen tile size. It is shown that a speedup of 8 times can be achieved by choosing the appropriate tile size on a 60-core Intel accelerator. In order to determine appropriate tile size, the paper proposes an adaptive tiling approach to implicitly adapt the tile size to the distribution of threads, the cache capacity, cache latency, problem size and dynamic changes in the access pattern over the iterations. The proposed adaptive tiling approach can be used as an optimization option in parallel compilers.}
+}
