@@ -8,29 +8,29 @@
 
 \title{On the parallelization of a N-body simulation}
 
-\author{Alice}
-\email{alice@mail.com}
+\author{André Mendes}
+\email{andre@mail.com}
 \affiliation{
   \institution{Universidade do Minho}
   \city{Braga}
   \country{Portugal}
 }
-\author{Bob}
-\email{bob@mail.com}
+\author{Bruno Jardim}
+\email{bruno.f.jardim@inesctec.pt}
 \affiliation{
   \institution{Universidade do Minho}
   \city{Braga}
   \country{Portugal}
 }
-\author{Charlie}
-\email{charlie@mail.com}
+\author{Roberto Figueiredo}
+\email{roberto@mail.com}
 \affiliation{
   \institution{Universidade do Minho}
   \city{Braga}
   \country{Portugal}
 }
 
-\renewcommand{\shortauthors}{Alice et al.}
+\renewcommand{\shortauthors}{Mendes et al.}
 
 
 \begin{abstract}
@@ -56,6 +56,23 @@ This issue becomes quite significant when it comes to N-body problems. These pro
 In real-world scenarios, these applications require millions, if not billions, of particles in order to simulate any interesting phenomena. Thus making serial implementations of these applications impractical. This necessitates parallelization for these kinds of problems. 
 However, parallelism isn't a solution without any drawbacks, there are a lot of considerations when parallelizing any algorithm. Such as the synchronization overheads, load imbalances, cache coherence effects, and even, memory bandwidth limitations.
 This article goes over the parallelization of a N-body simulation on multicore CPUs, focusing on memory behavior, scalability and algorithmic design choices.
+
+\section{Background}
+\subsection{Overview of the N-body Problem}
+The N-body problem aims to simulate the time evolution of a given system with N particles, where all particles affect one another.
+Each time step necessitates the computation of the net forces that act on every single particle based on the states of all others and then updating their position and velocity.
+This results in an $O(N^2)$ complexity on every time step. Making the problem increasingly more expensive as $N$ grows.
+
+Due to this design the N-body problem is a well-suited candidate for parallelization. This is further reinforced by the fact that the force computations on individual particles are independent within that time step. However, most implementations on multicore CPUs are constrained by memory bottlenecks, cache coherence effects and even synchronization overheads.
+Thus, achieving linear speedups is not as trivial as it might seem.
+
+Performance is heavily influenced by memory access patterns along with the in-memory representation of the given datastructures.
+As they can significantly improve cache utilization and throughput.
+All of these characteristics make the N-body problem a very useful benchmark for parallel performance on modern CPU architectures.
+
+\subsection{Parallel Computing on Multicore CPUs with OpenMP} 
+
+
 
 
 \bibliographystyle{plain}
