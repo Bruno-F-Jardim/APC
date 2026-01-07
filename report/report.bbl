@@ -1,5 +1,10 @@
 \begin{thebibliography}{1}
 
+\bibitem{openmp_shared_memory_model}
+Openmp application programming interface.
+\newblock \url{https://www.openmp.org}, 2026.
+\newblock Accessed 2026.
+
 \bibitem{Moore_Law}
 G.E. Moore.
 \newblock Cramming more components onto integrated circuits.
