@@ -34,7 +34,7 @@
 
 
 \begin{abstract}
-  This report documents the parallelization techniques implemented on a N-body simulation. This was achieved through the OpenMP API. After carefully analyzing and tested different optimization locations, the resulting program had a xxx\% speedup compared to the original, sequential implementation. This result shows that physical, N-body simulations are an excellent target for parallel code optimizations. As even very simple optimization techniques are able to produce a huge speedup.
+  This report documents the parallelization techniques implemented on a N-body simulation. This was achieved through the OpenMP\cite{openmp_shared_memory_model} API. After carefully analyzing and tested different optimization locations, the resulting program had a xxx\% speedup compared to the original, sequential implementation. This result shows that physical, N-body simulations are an excellent target for parallel code optimizations. As even very simple optimization techniques are able to produce a huge speedup.
 \end{abstract}
 
 \keywords{Parallel, Parallelization, Code Optimization, Simulation, Physics Simulation, OpenMP}
@@ -71,8 +71,23 @@ As they can significantly improve cache utilization and throughput.
 All of these characteristics make the N-body problem a very useful benchmark for parallel performance on modern CPU architectures.
 
 \subsection{Parallel Computing on Multicore CPUs with OpenMP} 
+OpenMP\cite{openmp_shared_memory_model} is a commonly used programming model for shared-memory parallelism on multicore CPUs, providing a directive-based approach for defining parallel regions, work sharing, and synchronization. It allows existing sequential code to be parallelized incrementally, while maintaining a single shared address space. However, this abstraction does not remove the underlying costs associated with thread management, synchronization, and memory access, and as such performance still depends heavily on implementation details.
 
+Parallel execution in OpenMP is most often achieved by distributing loop iterations or tasks across a team of threads. This maps well to data-parallel workloads such as N-body force calculations. However, scalability is influenced by scheduling choices such as the granularity of parallel work, and the amount of implicit synchronization introduced by constructs like barriers and reductions. Thus, suboptimal scheduling or excessive synchronization can limit performance improvements.
 
+Memory behavior remains a central concern in OpenMP programs. Threads operate on cache-coherent shared memory, and frequent access to shared data can increase cache coherence traffic. This can lead to issues such as false sharing and reduced cache efficiency, which thus negatively affect scalability. As such, achieving good performance with OpenMP requires careful consideration of data layout, access patterns, and synchronization placement, in addition to exposing sufficient parallelism.
+
+\section{Sequential Implementation of the N-Body Simulation}
+
+The sequential implementation of the N-body simulation follows a straightforward time-stepping approach based on direct pairwise force computation. At each simulation step, the physics engine computes gravitational accelerations for all bodies and then updates their velocities and positions using explicit numerical integration. This implementation serves as the performance and correctness baseline against which parallel versions are evaluated.
+
+The core computation is performed in the \texttt{integrateStep} function, which operates on a vector of bodies. For a system of $N$ bodies, the function first allocates an auxiliary array to store the acceleration vectors for each body. The accelerations are initialized to zero at the beginning of each step, ensuring that force accumulation from the previous iteration does not persist. As such, force computation and state updates are cleanly separated.
+
+Gravitational forces are computed using a double-nested loop that iterates over all pairs of bodies. For each body $i$, the contribution from every other body $j$ is accumulated, excluding self-interactions. The force calculation is based on the classical inverse-square law, with a small softening term added to the distance computation to avoid numerical instability when bodies are very close. This approach results in a computational complexity of $O(N^2)$ per simulation step, which quickly becomes the dominant cost as the number of bodies increases.
+
+Once all accelerations have been computed, a second loop updates the velocities and positions of each body using a simple explicit integration scheme. Velocities are updated based on the computed accelerations and the time step size, and positions are then advanced using the updated velocities. This integration method is computationally inexpensive but conditionally stable, and thus appropriate for short time steps and as a baseline reference.
+
+Overall, the sequential implementation emphasizes clarity and correctness rather than performance optimization. It makes no attempt to reduce asymptotic complexity or exploit hardware parallelism. However, its simple structure and deterministic execution order make it well suited as a reference point for evaluating the effects of parallelization, memory behavior, and scalability in subsequent implementations.
 
 
 \bibliographystyle{plain}
