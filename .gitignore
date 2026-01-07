@@ -326,4 +326,5 @@ TSWLatexianTemp*
 #*Notes.bib
 
 # C/C++ project files
+.vscode/
 build/
