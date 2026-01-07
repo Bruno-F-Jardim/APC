@@ -1,3 +1,31 @@
 Para compilar o artigo utilizar:
 
 latexmk -pdf report.tex
+
+
+# Estrutura do artigo
+
+## Introduction
+
+## Background
+- N-body Problem
+- Parallel Computing on Multicore CPUs with OpenMP
+
+## Sequential Implementation
+
+## Parallel Implementation
+
+- Strategy
+- Shared Memory Considerations
+- Memory and Cache Optimizations
+
+## Reproducibility (?)
+- Hardware specification
+- Software specification (Version of compiler used, flags...)
+- Inputs (?)
+
+## Performance Evaluation
+
+## Discussion
+
+## Conclusions and Future Work
