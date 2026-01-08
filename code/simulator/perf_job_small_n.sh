@@ -11,7 +11,7 @@ module load cmake/3.22.0
 
 # 1. Compile with -g (needed for perf to map instructions to code)
 
-rm -r build/* test_results/seq_simd
+rm -r build/*
 mkdir -p test_results/seq_simd
 cd build 
 cmake -DCMAKE_CXX_FLAGS="-O3 -fopenmp" ..
