@@ -29,7 +29,7 @@ for N in $N_VALUES; do
     # We save this to a separate file for your report
     echo "Running Perf on Trial 1..."
     srun perf stat -e cycles,instructions,cache-references,cache-misses,L1-dcache-load-misses \
-        -o test_results/parallel/perf_N$N.txt ./build/simulate $N 3600 36000 > simulation_results/parallel/result_N$N.txt
+        -o test_results/parallel/perf_N$N.txt ./build/simulate $N 3600 36000 > /dev/null
 
     # Trials 2-10: Capture clean wall-clock time
     echo "Running remaining trials for timing..."
