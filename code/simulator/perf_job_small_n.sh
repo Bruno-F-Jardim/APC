@@ -11,8 +11,8 @@ module load cmake/3.22.0
 
 # 1. Compile with -g (needed for perf to map instructions to code)
 
-rm -r build/* test_results/*
-mkdir -p test_results/baseline
+rm -r build/* test_results/seq_simd
+mkdir -p test_results/seq_simd
 cd build 
 cmake -DCMAKE_CXX_FLAGS="-O3 -fopenmp" ..
 make
@@ -29,12 +29,12 @@ for N in $N_VALUES; do
     # We save this to a separate file for your report
     echo "Running Perf on Trial 1..."
     srun perf stat -e cycles,instructions,cache-references,cache-misses,L1-dcache-load-misses \
-        -o test_results/baseline/perf_N$N.txt ./build/simulate $N 3600 36000 > simulation_results/baseline/result_N$N.txt
+        -o test_results/seq_simd/perf_N$N.txt ./build/simulate $N 3600 36000 > simulation_results/seq_simd/result_N$N.txt
 
     # Trials 2-10: Capture clean wall-clock time
     echo "Running remaining trials for timing..."
     for i in $(seq 2 $TRIALS); do
-       { time ./build/simulate $N 3600 36000 ; } 2>> test_results/baseline/time_results_$N.txt > /dev/null
+       { time ./build/simulate $N 3600 36000 ; } 2>> test_results/seq_simd/time_results_$N.txt > /dev/null
     done
 done
 
