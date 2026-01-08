@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <omp.h>
 
 // -------------------- Vec3 helper functions --------------------
 namespace {
@@ -49,6 +50,7 @@ void PhysicsEngine::integrateStep(SoABodies& bodies, double dt) {
         double py = bodies.pos_y[i];
         double pz = bodies.pos_z[i];
 
+        #pragma omp simd reduction(+:ax, ay, az)
         for (size_t j = 0; j < n; ++j) {
             // if (i == j) continue; removed to optimize performance
             
@@ -70,6 +72,7 @@ void PhysicsEngine::integrateStep(SoABodies& bodies, double dt) {
         bodies.acc_z[i] += az;
     }
 
+    #pragma omp simd
     for (size_t i = 0; i < n; ++i) {
         bodies.vel_x[i] += bodies.acc_x[i] * dt;
         bodies.vel_y[i] += bodies.acc_y[i] * dt;
