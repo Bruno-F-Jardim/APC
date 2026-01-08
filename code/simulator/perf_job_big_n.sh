@@ -14,7 +14,7 @@ module load cmake/3.22.0
 rm -r build/* test_results/*
 mkdir -p test_results/baseline
 cd build 
-cmake -DCMAKE_CXX_FLAGS="-O3 -g" ..
+cmake -DCMAKE_CXX_FLAGS="-O3 -fopenmp" ..
 make
 cd ..
 
