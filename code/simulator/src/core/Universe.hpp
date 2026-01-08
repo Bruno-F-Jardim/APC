@@ -6,13 +6,13 @@ class Universe {
 public:
     Universe() = default;
 
-    void addBody(const Body& body) { bodies_.push_back(body); }
+    void setBodies(const SoABodies& bodies) { bodies_ = bodies; }
 
-    std::vector<Body>& getBodies() { return bodies_; }
-    const std::vector<Body>& getBodies() const { return bodies_; }
+    SoABodies& getBodies() { return bodies_; }
+    const SoABodies& getBodies() const { return bodies_; }
 
     size_t getNumBodies() const { return bodies_.size(); }
 
 private:
-    std::vector<Body> bodies_;
+    SoABodies bodies_;
 };

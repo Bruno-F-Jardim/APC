@@ -16,18 +16,19 @@ OutputWriter::~OutputWriter() {
     if (outFile_.is_open()) outFile_.close();
 }
 
-void OutputWriter::writeStep(const std::vector<Body>& bodies, double t) {
+void OutputWriter::writeStep(const SoABodies& bodies, double t) {
     if (!outFile_.is_open()) return;
 
     outFile_ << "# Step " << stepCounter_ << ", Time: " << t << " s\n";
     outFile_ << "Name Mass Px Py Pz Vx Vy Vz\n";
 
-    for (const auto& b : bodies) {
-        outFile_ << std::setw(10) << b.name << " "
+    size_t n = bodies.size();
+    for (size_t i = 0; i < n; ++i) {
+        outFile_ << std::setw(10) << bodies.name[i] << " "
                  << std::scientific << std::setprecision(6)
-                 << b.mass << " "
-                 << b.position.x << " " << b.position.y << " " << b.position.z << " "
-                 << b.velocity.x << " " << b.velocity.y << " " << b.velocity.z << "\n";
+                 << bodies.mass[i] << " "
+                 << bodies.pos_x[i] << " " << bodies.pos_y[i] << " " << bodies.pos_z[i] << " "
+                 << bodies.vel_x[i] << " " << bodies.vel_y[i] << " " << bodies.vel_z[i] << "\n";
     }
 
     outFile_ << "\n";

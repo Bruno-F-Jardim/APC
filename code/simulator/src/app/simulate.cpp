@@ -32,9 +32,7 @@ int main(int argc, char* argv[]) {
     // ----------------------------------------------------
     // 3. Initialize Bodies (example: Sun + Earth)
     // ----------------------------------------------------
-    for (const auto& body : bodies) {
-        universe.addBody(body);
-    }
+    universe.setBodies(bodies);
 
     std::cout << "Initialized " << universe.getNumBodies() << " bodies\n";
 

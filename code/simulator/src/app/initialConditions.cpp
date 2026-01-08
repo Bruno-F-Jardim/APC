@@ -54,8 +54,9 @@ Body generateRandomSmallBody(size_t index) {
 
 } // anonymous namespace
 
-std::vector<Body> generateInitialConditions(size_t numberOfBodies) {
-    std::vector<Body> bodies;
+SoABodies generateInitialConditions(size_t numberOfBodies) {
+    SoABodies bodies;
+    bodies.reserve(numberOfBodies);
 
     // --- Sun + planets ---
     bodies.push_back(Body{"Sun", 1.989e30, Vec3{0,0,0}, Vec3{0,0,0}});
@@ -97,12 +98,35 @@ std::vector<Body> generateInitialConditions(size_t numberOfBodies) {
         // Find parent planet position
         Vec3 parentPos{0,0,0};
         Vec3 parentVel{0,0,0};
-        if (moon.name == "Moon") { parentPos = bodies[3].position; parentVel = bodies[3].velocity; } // Earth
-        else if (moon.name == "Phobos" || moon.name == "Deimos") { parentPos = bodies[4].position; parentVel = bodies[4].velocity; } // Mars
-        else if (moon.name == "Io" || moon.name == "Europa" || moon.name == "Ganymede" || moon.name == "Callisto") { parentPos = bodies[5].position; parentVel = bodies[5].velocity; } // Jupiter
-        else if (moon.name == "Titan" || moon.name == "Rhea" || moon.name == "Iapetus" || moon.name == "Dione" || moon.name == "Tethys" || moon.name == "Enceladus" || moon.name == "Mimas") { parentPos = bodies[6].position; parentVel = bodies[6].velocity; } // Saturn
-        else if (moon.name == "Miranda" || moon.name == "Ariel" || moon.name == "Umbriel" || moon.name == "Titania" || moon.name == "Oberon") { parentPos = bodies[7].position; parentVel = bodies[7].velocity; } // Uranus
-        else if (moon.name == "Triton") { parentPos = bodies[8].position; parentVel = bodies[8].velocity; } // Neptune
+        
+        // Use direct vector access since we are building SoA
+        // Be careful about indices. We assume the bodies are added in order above.
+        // Sun=0, Mercury=1, Venus=2, Earth=3, Mars=4, Jupiter=5, Saturn=6, Uranus=7, Neptune=8
+        
+        if (moon.name == "Moon") { 
+             parentPos = Vec3{bodies.pos_x[3], bodies.pos_y[3], bodies.pos_z[3]}; 
+             parentVel = Vec3{bodies.vel_x[3], bodies.vel_y[3], bodies.vel_z[3]}; 
+        } 
+        else if (moon.name == "Phobos" || moon.name == "Deimos") { 
+             parentPos = Vec3{bodies.pos_x[4], bodies.pos_y[4], bodies.pos_z[4]}; 
+             parentVel = Vec3{bodies.vel_x[4], bodies.vel_y[4], bodies.vel_z[4]}; 
+        }
+        else if (moon.name == "Io" || moon.name == "Europa" || moon.name == "Ganymede" || moon.name == "Callisto") { 
+             parentPos = Vec3{bodies.pos_x[5], bodies.pos_y[5], bodies.pos_z[5]}; 
+             parentVel = Vec3{bodies.vel_x[5], bodies.vel_y[5], bodies.vel_z[5]}; 
+        }
+        else if (moon.name == "Titan" || moon.name == "Rhea" || moon.name == "Iapetus" || moon.name == "Dione" || moon.name == "Tethys" || moon.name == "Enceladus" || moon.name == "Mimas") { 
+             parentPos = Vec3{bodies.pos_x[6], bodies.pos_y[6], bodies.pos_z[6]}; 
+             parentVel = Vec3{bodies.vel_x[6], bodies.vel_y[6], bodies.vel_z[6]}; 
+        }
+        else if (moon.name == "Miranda" || moon.name == "Ariel" || moon.name == "Umbriel" || moon.name == "Titania" || moon.name == "Oberon") { 
+             parentPos = Vec3{bodies.pos_x[7], bodies.pos_y[7], bodies.pos_z[7]}; 
+             parentVel = Vec3{bodies.vel_x[7], bodies.vel_y[7], bodies.vel_z[7]}; 
+        }
+        else if (moon.name == "Triton") { 
+             parentPos = Vec3{bodies.pos_x[8], bodies.pos_y[8], bodies.pos_z[8]}; 
+             parentVel = Vec3{bodies.vel_x[8], bodies.vel_y[8], bodies.vel_z[8]}; 
+        }
 
         double theta = ((double) rand() / RAND_MAX) * 2 * M_PI;
         Vec3 moonPos = {

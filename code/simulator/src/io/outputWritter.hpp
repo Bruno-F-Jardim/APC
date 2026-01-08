@@ -9,7 +9,7 @@ public:
     OutputWriter(const std::string& filename);
     ~OutputWriter();
 
-    void writeStep(const std::vector<Body>& bodies, double t);
+    void writeStep(const SoABodies& bodies, double t);
 
 private:
     std::ofstream outFile_;

@@ -3,4 +3,4 @@
 #include <string>
 #include "core/Body.hpp"
 
-std::vector<Body> generateInitialConditions(size_t numberOfBodies);
+SoABodies generateInitialConditions(size_t numberOfBodies);
