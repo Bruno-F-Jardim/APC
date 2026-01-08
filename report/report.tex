@@ -1,5 +1,5 @@
 \documentclass[acmlarge]{acmart}
-
+\usepackage{listings}
 \AtBeginDocument{%
   \providecommand\BibTeX{{%
     Bib\TeX}}}
@@ -88,6 +88,69 @@ Gravitational forces are computed using a double-nested loop that iterates over 
 Once all accelerations have been computed, a second loop updates the velocities and positions of each body using a simple explicit integration scheme. Velocities are updated based on the computed accelerations and the time step size, and positions are then advanced using the updated velocities. This integration method is computationally inexpensive but conditionally stable, and thus appropriate for short time steps and as a baseline reference.
 
 Overall, the sequential implementation emphasizes clarity and correctness rather than performance optimization. It makes no attempt to reduce asymptotic complexity or exploit hardware parallelism. However, its simple structure and deterministic execution order make it well suited as a reference point for evaluating the effects of parallelization, memory behavior, and scalability in subsequent implementations.
+
+\section{ILP Optimizations}
+
+
+The first step when optimizing the sequential implementation is exploring the inherent capabilities of modern CPUs to execute multiple instructions concurrently. Even without introducing thread-level parallelism, the baseline N-body implementation exposes opportunities for improved instruction-level parallelism through careful ordering of arithmetic operations and memory accesses. As such, changes such as reducing control dependencies, increasing the number of independent operations, and improving data locality can significantly increase single-core performance. These optimizations preserve the sequential execution model while providing a more efficient foundation for subsequent shared-memory parallelization.
+
+\begin{lstlisting}[language=C++]
+void PhysicsEngine::integrateStep(SoABodies& bodies, double dt) {
+    const double G = 6.67430e-11;
+    size_t n = bodies.size();
+
+    // Reset accelerations
+    std::fill(bodies.acc_x.begin(), bodies.acc_x.end(), 0.0);
+    std::fill(bodies.acc_y.begin(), bodies.acc_y.end(), 0.0);
+    std::fill(bodies.acc_z.begin(), bodies.acc_z.end(), 0.0);
+
+    for (size_t i = 0; i < n; ++i) {
+        double ax = 0.0, ay = 0.0, az = 0.0;
+
+        double px = bodies.pos_x[i];
+        double py = bodies.pos_y[i];
+        double pz = bodies.pos_z[i];
+
+        for (size_t j = 0; j < n; ++j) {
+            // if (i == j) continue; removed to optimize performance
+            
+            double rx = bodies.pos_x[j] - px;
+            double ry = bodies.pos_y[j] - py;
+            double rz = bodies.pos_z[j] - pz;
+            
+            double distSq = rx * rx + ry * ry + rz * rz + 1e-9;
+            double inv_dist = 1.0 / std::sqrt(distSq);
+            double inv_dist3 = inv_dist * inv_dist * inv_dist;
+            double factor = G * bodies.mass[j] * inv_dist3;
+            ax += factor * rx;
+            ay += factor * ry;
+            az += factor * rz;
+            
+        }
+        bodies.acc_x[i] += ax;
+        bodies.acc_y[i] += ay;
+        bodies.acc_z[i] += az;
+    }
+
+    for (size_t i = 0; i < n; ++i) {
+        bodies.vel_x[i] += bodies.acc_x[i] * dt;
+        bodies.vel_y[i] += bodies.acc_y[i] * dt;
+        bodies.vel_z[i] += bodies.acc_z[i] * dt;
+        
+        bodies.pos_x[i] += bodies.vel_x[i] * dt;
+        bodies.pos_y[i] += bodies.vel_y[i] * dt;
+        bodies.pos_z[i] += bodies.vel_z[i] * dt;
+    }
+}
+\end{lstlisting}
+
+The implementation exposes a significant amount of instruction-level parallelism through careful ordering of arithmetic operations and data access patterns. In the inner force computation loop, independent floating-point operations are structured in a way that allows the CPU to overlap execution and hide instruction latencies. In particular, the accumulation of acceleration components along each axis is performed using separate scalar variables, enabling the processor to execute these operations concurrently where possible.
+
+Several code-level decisions further improve ILP. Particle position values for the outer-loop body are loaded once into local variables before entering the inner loop, reducing redundant memory accesses and allowing the compiler to better schedule dependent instructions. Additionally, the use of a structure-of-arrays data layout results in contiguous memory accesses, which improves cache behavior and allows the processor to issue multiple independent load instructions in parallel.
+
+The removal of the conditional branch that excludes self-interactions eliminates a potential control dependency inside the inner loop. This reduces branch misprediction penalties and allows the instruction pipeline to remain fully utilized. As such, the inner loop consists primarily of straight-line code with predictable control flow, which is well suited for both static compiler scheduling and dynamic out-of-order execution. While these changes do not alter the algorithmic complexity, they improve single-core efficiency by increasing effective instruction throughput.
+
+\section{SIMD Optimizations}
 
 
 \bibliographystyle{plain}
