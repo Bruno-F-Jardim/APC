@@ -43,6 +43,7 @@ void PhysicsEngine::integrateStep(SoABodies& bodies, double dt) {
     std::fill(bodies.acc_y.begin(), bodies.acc_y.end(), 0.0);
     std::fill(bodies.acc_z.begin(), bodies.acc_z.end(), 0.0);
 
+    #pragma omp parallel for schedule(static)
     for (size_t i = 0; i < n; ++i) {
         double ax = 0.0, ay = 0.0, az = 0.0;
 
@@ -72,7 +73,7 @@ void PhysicsEngine::integrateStep(SoABodies& bodies, double dt) {
         bodies.acc_z[i] += az;
     }
 
-    #pragma omp simd
+    #pragma omp parallel for schedule(static)
     for (size_t i = 0; i < n; ++i) {
         bodies.vel_x[i] += bodies.acc_x[i] * dt;
         bodies.vel_y[i] += bodies.acc_y[i] * dt;
