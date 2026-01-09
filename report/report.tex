@@ -9,10 +9,10 @@
 \title{On the parallelization of a N-body simulation}
 
 \author{André Mendes}
-\email{andre@mail.com}
+\email{up202511259@edu.fc.up.pt}
 \affiliation{
-  \institution{Universidade do Minho}
-  \city{Braga}
+  \institution{Universidade do Porto}
+  \city{Porto}
   \country{Portugal}
 }
 \author{Bruno Jardim}
@@ -23,10 +23,10 @@
   \country{Portugal}
 }
 \author{Roberto Figueiredo}
-\email{roberto@mail.com}
+\email{robertof@ua.pt}
 \affiliation{
-  \institution{Universidade do Minho}
-  \city{Braga}
+  \institution{Universidade de Aveiro}
+  \city{Aveiro}
   \country{Portugal}
 }
 
@@ -34,7 +34,7 @@
 
 
 \begin{abstract}
-  This report documents the parallelization techniques implemented on a N-body simulation. This was achieved through the OpenMP\cite{openmp_shared_memory_model} API. After carefully analyzing and tested different optimization locations, the resulting program had a xxx\% speedup compared to the original, sequential implementation. This result shows that physical, N-body simulations are an excellent target for parallel code optimizations. As even very simple optimization techniques are able to produce a huge speedup.
+  This report documents the parallelization techniques implemented on a N-body simulation. This was achieved through the OpenMP\cite{openmp_shared_memory_model} API. After carefully analyzing and tested different optimization locations, the resulting program had a 24.98x speedup compared to the original, sequential implementation. This result shows that physical, N-body simulations are an excellent target for parallel code optimizations. As even very simple optimization techniques are able to produce a huge speedup.
 \end{abstract}
 
 \keywords{Parallel, Parallelization, Code Optimization, Simulation, Physics Simulation, OpenMP}
@@ -298,30 +298,17 @@ The implementation follows a shared-memory model in which all threads access the
 
 Performance is strongly affected by how particle data is accessed in memory. The structure-of-arrays layout improves spatial locality and enables more efficient cache usage during the force computation. Writing acceleration data to distinct array elements reduces false sharing, but cache line alignment and memory traffic remain relevant factors, particularly on systems with many cores.
 
-\section{Experimental Setup}
+
+
+
+\section{Experimental Results}
+
+\subsection{Experimental Setup}
 
 
 All experiments were executed on the SeARCH cluster at Universidade do Minho. The specific partition used for the runs was equipped with nodes based on the Intel Xeon E5-2650 v2 processor, a server-class CPU with 8 physical cores and 16 threads capable of operating at a base frequency of 2.60 GHz and a overclocking up to 3.40 GHz. The processor implements the Ivy Bridge microarchitecture which supports SIMD and multithreading extensions and includes 20 MB of shared L3 cache, making it suitable for exploring both thread-level and data-level parallelism in shared-memory codes such as the N-body simulation.
 
 All code was compiled using GCC version 11.2.0 with the \texttt{-O3} optimization flag enabled.
-
-
-\section{Performance Evaluation}
-
-\section{Discussion}
-
-\section{Conclusions \& Future Work}
-
-In this work, we explored the parallelization and optimization of an $N$-body simulation targeting modern multicore CPUs. Starting from a sequential implementation, we refactored the code to better exploit the capabilities of contemporary hardware, such as thread-level parallelism, data-level parallelism and improvements to memory access patterns. We applied the changes step by step, allowing us to evaluate their impact with each new optimization added.
-
-Our results suggest that the optimized implementations have a significant edge in performance compared to the original sequential version. In particular, exploiting parallelism in the force computation phase proved very effective, as this phase dominates the overall runtime of the simulation. Even though performance gains vary depending on problem size and execution configuration, the results show the importance of aligning algorithm structure with the underlying hardware architecture.
-
-We demonstrate that even relatively straightforward parallelization strategies can yield substantial performance boosts when combined with intelligent data layout and execution order. The work that was done provides a solid foundation for further exploration, including more advanced optimization techniques, such as specifying the cores in which thread is executed, and alternative parallelization models. One of those are GPU-based implementations, as their massive parallelism and high memory bandwidth are well-suited to the computational characteristics of the $N$-body problem.
-
-
-\section{Experimental Results}
-
-This section presents the performance evaluation of the different optimization phases. The experiments were conducted on the SeARCH cluster, using an Intel-based architecture.
 
 \subsection{Evaluation Metrics}
 
@@ -411,6 +398,17 @@ Table \ref{tab:phase4} presents the results for shared memory parallelism using 
   \Description{Execution Time vs Number of Threads (Log Scale)}
   \label{fig:time_plot}
 \end{figure}
+
+\section{Conclusions \& Future Work}
+
+In this work, we explored the parallelization and optimization of an $N$-body simulation targeting modern multicore CPUs. Starting from a sequential implementation, we refactored the code to better exploit the capabilities of contemporary hardware, such as thread-level parallelism, data-level parallelism and improvements to memory access patterns. We applied the changes step by step, allowing us to evaluate their impact with each new optimization added.
+
+Our results suggest that the optimized implementations have a significant edge in performance compared to the original sequential version. In particular, exploiting parallelism in the force computation phase proved very effective, as this phase dominates the overall runtime of the simulation. Even though performance gains vary depending on problem size and execution configuration, the results show the importance of aligning algorithm structure with the underlying hardware architecture.
+
+We demonstrate that even relatively straightforward parallelization strategies can yield substantial performance boosts when combined with intelligent data layout and execution order. The work that was done provides a solid foundation for further exploration, including more advanced optimization techniques, such as specifying the cores in which thread is executed, and alternative parallelization models. One of those are GPU-based implementations, as their massive parallelism and high memory bandwidth are well-suited to the computational characteristics of the $N$-body problem.
+
+
+
 
 \bibliographystyle{plain}
 \bibliography{refs.bib}
