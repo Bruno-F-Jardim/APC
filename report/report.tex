@@ -83,16 +83,21 @@ The sequential implementation of the N-body simulation follows a straightforward
 
 The core computation is performed in the \texttt{integrateStep} function, which operates on a vector of bodies. For a system of $N$ bodies, the function first allocates an auxiliary array to store the acceleration vectors for each body. The accelerations are initialized to zero at the beginning of each step, ensuring that force accumulation from the previous iteration does not persist. As such, force computation and state updates are cleanly separated.
 
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{figures/gprof.png}
+\end{figure}
+
 Gravitational forces are computed using a double-nested loop that iterates over all pairs of bodies. For each body $i$, the contribution from every other body $j$ is accumulated, excluding self-interactions. The force calculation is based on the classical inverse-square law, with a small softening term added to the distance computation to avoid numerical instability when bodies are very close. This approach results in a computational complexity of $O(N^2)$ per simulation step, which quickly becomes the dominant cost as the number of bodies increases.
 
 Once all accelerations have been computed, a second loop updates the velocities and positions of each body using a simple explicit integration scheme. Velocities are updated based on the computed accelerations and the time step size, and positions are then advanced using the updated velocities. This integration method is computationally inexpensive but conditionally stable, and thus appropriate for short time steps and as a baseline reference.
 
-Overall, the sequential implementation emphasizes clarity and correctness rather than performance optimization. It makes no attempt to reduce asymptotic complexity or exploit hardware parallelism. However, its simple structure and deterministic execution order make it well suited as a reference point for evaluating the effects of parallelization, memory behavior, and scalability in subsequent implementations.
+The sequential implementation prioritizes clarity and correctness rather than performance. It makes no attempt to reduce complexity or exploit hardware parallelism. However, its simple structure and deterministic execution order make it well suited as a reference point for evaluating the effects of parallelization, memory behavior, and scalability in subsequent implementations.
 
 \section{ILP Optimizations}
 
 
-The first step when optimizing the sequential implementation is exploring the inherent capabilities of modern CPUs to execute multiple instructions concurrently. Even without introducing thread-level parallelism, the baseline N-body implementation exposes opportunities for improved instruction-level parallelism through careful ordering of arithmetic operations and memory accesses. As such, changes such as reducing control dependencies, increasing the number of independent operations, and improving data locality can significantly increase single-core performance. These optimizations preserve the sequential execution model while providing a more efficient foundation for subsequent shared-memory parallelization.
+The first step when optimizing the sequential implementation is exploring the inherent capabilities of modern CPUs to execute multiple instructions concurrently. Even without introducing thread-level parallelism, the sequential N-body implementation exposes opportunities for improved instruction-level parallelism through careful ordering of arithmetic operations and memory accesses. As such, changes such as reducing control dependencies, increasing the number of independent operations, and improving data locality can significantly increase single-core performance. These optimizations preserve the sequential execution model while providing a more efficient foundation for subsequent shared-memory parallelization.
 
 \begin{lstlisting}[language=C++]
 void PhysicsEngine::integrateStep(SoABodies& bodies, double dt) {
@@ -144,7 +149,7 @@ void PhysicsEngine::integrateStep(SoABodies& bodies, double dt) {
 }
 \end{lstlisting}
 
-The implementation exposes a significant amount of instruction-level parallelism through careful ordering of arithmetic operations and data access patterns. In the inner force computation loop, independent floating-point operations are structured in a way that allows the CPU to overlap execution and hide instruction latencies. In particular, the accumulation of acceleration components along each axis is performed using separate scalar variables, enabling the processor to execute these operations concurrently where possible.
+The implementation exploits significant amount of instruction-level parallelism through careful ordering of arithmetic operations and data access patterns. In the inner force computation loop, independent floating-point operations are structured in a way that allows the CPU to overlap execution and hide instruction latencies. In particular, the accumulation of acceleration components along each axis is performed using separate scalar variables, enabling the processor to execute these operations concurrently whenever possible.
 
 Several code-level decisions further improve ILP. Particle position values for the outer-loop body are loaded once into local variables before entering the inner loop, reducing redundant memory accesses and allowing the compiler to better schedule dependent instructions. Additionally, the use of a structure-of-arrays data layout results in contiguous memory accesses, which improves cache behavior and allows the processor to issue multiple independent load instructions in parallel.
 
@@ -217,7 +222,7 @@ While SIMD vectorization improves single-core performance by exploiting data-lev
 
 \section{Parallel Implementation}
 
-The parallel implementation builds on the sequential baseline by introducing shared-memory parallelism using OpenMP. Rather than restructuring the algorithm, parallelism is applied to the main phases of the time-stepping procedure: acceleration reset, force computation, and state update. These phases are executed within a single parallel region, allowing threads to be reused across multiple work-sharing constructs and reducing parallel region overhead. As such, the implementation combines thread-level parallelism across bodies with data-level parallelism inside the force computation.
+The parallel implementation builds on the sequential implementation by introducing shared-memory parallelism using OpenMP. Rather than restructuring the algorithm, parallelism is applied to the main phases of the time-stepping procedure: acceleration reset, force computation, and state update. These phases are executed within a single parallel region, allowing threads to be reused across multiple work-sharing constructs and reducing parallel region overhead. As such, the implementation combines thread-level parallelism across bodies with data-level parallelism inside the force computation.
 
 \begin{lstlisting}[language=C++]
 void PhysicsEngine::integrateStep(SoABodies& bodies, double dt) {
@@ -295,11 +300,23 @@ Performance is strongly affected by how particle data is accessed in memory. The
 
 \section{Experimental Setup}
 
+
+All experiments were executed on the SeARCH cluster at Universidade do Minho. The specific partition used for the runs was equipped with nodes based on the Intel Xeon E5-2650 v2 processor, a server-class CPU with 8 physical cores and 16 threads capable of operating at a base frequency of 2.60 GHz and a overclocking up to 3.40 GHz. The processor implements the Ivy Bridge microarchitecture which supports SIMD and multithreading extensions and includes 20 MB of shared L3 cache, making it suitable for exploring both thread-level and data-level parallelism in shared-memory codes such as the N-body simulation.
+
+All code was compiled using GCC version 11.2.0 with the \texttt{-O3} optimization flag enabled.
+
+
 \section{Performance Evaluation}
 
 \section{Discussion}
 
 \section{Conclusions \& Future Work}
+
+In this work, we explored the parallelization and optimization of an $N$-body simulation targeting modern multicore CPUs. Starting from a sequential implementation, we refactored the code to better exploit the capabilities of contemporary hardware, such as thread-level parallelism, data-level parallelism and improvements to memory access patterns. We applied the changes step by step, allowing us to evaluate their impact with each new optimization added.
+
+Our results suggest that the optimized implementations have a significant edge in performance compared to the original sequential version. In particular, exploiting parallelism in the force computation phase proved very effective, as this phase dominates the overall runtime of the simulation. Even though performance gains vary depending on problem size and execution configuration, the results show the importance of aligning algorithm structure with the underlying hardware architecture.
+
+We demonstrate that even relatively straightforward parallelization strategies can yield substantial performance boosts when combined with intelligent data layout and execution order. The work that was done provides a solid foundation for further exploration, including more advanced optimization techniques, such as specifying the cores in which thread is executed, and alternative parallelization models. One of those are GPU-based implementations, as their massive parallelism and high memory bandwidth are well-suited to the computational characteristics of the $N$-body problem.
 
 \bibliographystyle{plain}
 \bibliography{refs.bib}
