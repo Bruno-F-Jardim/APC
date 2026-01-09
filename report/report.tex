@@ -278,7 +278,7 @@ Table \ref{tab:phase3} presents the results after enabling SIMD vectorization. B
 \end{tabular}
 \end{table}
 
-Table \ref{tab:phase4} presents the results for shared memory parallelism using OpenMP. The experiments show significant speedups as the number of threads increases, utilizing the multicore architecture effectively. The results also demonstrate good scalability for larger problem sizes (N=100000 and N=500000), although diminishing returns are observed at higher thread counts due to synchronization overhead and memory bandwidth saturation.
+Table \ref{tab:phase4} presents the results for shared memory parallelism using OpenMP. The experiments show significant speedups as the number of threads increases, utilizing the multicore architecture effectively. The results also demonstrate good scalability for larger problem sizes (N=100000 and N=500000), although diminishing returns are observed at higher thread counts due to synchronization overhead and memory bandwidth saturation. This trend is visible in Figure \ref{fig:time_plot}, which illustrates the reduction in execution time as thread counts increase, highlighting the benefits of parallel execution for compute-intensive N-body simulations.
 
 \begin{table}[h]
 \centering
