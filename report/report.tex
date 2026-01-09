@@ -150,7 +150,70 @@ Several code-level decisions further improve ILP. Particle position values for t
 
 The removal of the conditional branch that excludes self-interactions eliminates a potential control dependency inside the inner loop. This reduces branch misprediction penalties and allows the instruction pipeline to remain fully utilized. As such, the inner loop consists primarily of straight-line code with predictable control flow, which is well suited for both static compiler scheduling and dynamic out-of-order execution. While these changes do not alter the algorithmic complexity, they improve single-core efficiency by increasing effective instruction throughput.
 
-\section{SIMD Optimizations}
+\subsection{Single Instruction, Multiple Data (SIMD)}
+
+In addition to instruction-level parallelism, the implementation exposes opportunities for data-level parallelism through SIMD execution. The inner force computation loop operates on arrays of particle data and applies the same sequence of arithmetic operations to each element. This regular structure makes the loop a suitable candidate for vectorization, allowing multiple interactions to be processed simultaneously using wide vector registers.
+
+The use of a structure-of-arrays data layout is particularly beneficial for SIMD execution. Particle positions, velocities, and masses are stored in separate contiguous arrays, enabling the compiler to generate vector load and store instructions with predictable memory access patterns. As such, multiple values of position or mass can be loaded into vector registers in a single instruction, improving throughput and reducing loop overhead.
+
+SIMD parallelism is explicitly encouraged through the use of OpenMP \texttt{simd} directives on both the force accumulation loop and the state update loop. In the force computation, a reduction clause is used to safely accumulate partial results into scalar acceleration variables. This allows the compiler to vectorize the loop while preserving correctness, even though the accumulation introduces loop-carried dependencies at the scalar level. The removal of conditional branches within the loop further simplifies vectorization by maintaining a uniform control flow across iterations.
+
+Similarly, the velocity and position update loop applies identical operations to independent elements of the state arrays and can be vectorized without requiring reductions. While SIMD execution does not change the algorithmic complexity of the simulation, it increases effective arithmetic throughput and improves single-core performance. As such, SIMD optimizations complement instruction-level parallelism and provide a more efficient foundation for thread-level parallelization in the shared-memory implementation.
+
+\begin{lstlisting}[language=C++]
+void PhysicsEngine::integrateStep(SoABodies& bodies, double dt) {
+    const double G = 6.67430e-11;
+    size_t n = bodies.size();
+
+    // Reset accelerations
+    std::fill(bodies.acc_x.begin(), bodies.acc_x.end(), 0.0);
+    std::fill(bodies.acc_y.begin(), bodies.acc_y.end(), 0.0);
+    std::fill(bodies.acc_z.begin(), bodies.acc_z.end(), 0.0);
+
+    for (size_t i = 0; i < n; ++i) {
+        double ax = 0.0, ay = 0.0, az = 0.0;
+
+        double px = bodies.pos_x[i];
+        double py = bodies.pos_y[i];
+        double pz = bodies.pos_z[i];
+
+        #pragma omp simd reduction(+:ax, ay, az)
+        for (size_t j = 0; j < n; ++j) {
+            // if (i == j) continue; removed to optimize performance
+            
+            double rx = bodies.pos_x[j] - px;
+            double ry = bodies.pos_y[j] - py;
+            double rz = bodies.pos_z[j] - pz;
+            
+            double distSq = rx * rx + ry * ry + rz * rz + 1e-9;
+            double inv_dist = 1.0 / std::sqrt(distSq);
+            double inv_dist3 = inv_dist * inv_dist * inv_dist;
+            double factor = G * bodies.mass[j] * inv_dist3;
+            ax += factor * rx;
+            ay += factor * ry;
+            az += factor * rz;
+            
+        }
+        bodies.acc_x[i] += ax;
+        bodies.acc_y[i] += ay;
+        bodies.acc_z[i] += az;
+    }
+
+    #pragma omp simd
+    for (size_t i = 0; i < n; ++i) {
+        bodies.vel_x[i] += bodies.acc_x[i] * dt;
+        bodies.vel_y[i] += bodies.acc_y[i] * dt;
+        bodies.vel_z[i] += bodies.acc_z[i] * dt;
+        
+        bodies.pos_x[i] += bodies.vel_x[i] * dt;
+        bodies.pos_y[i] += bodies.vel_y[i] * dt;
+        bodies.pos_z[i] += bodies.vel_z[i] * dt;
+    }
+}
+\end{lstlisting}
+
+
+While SIMD vectorization improves single-core performance by exploiting data-level parallelism within individual loops, it does not address parallelism across multiple cores. Thread-level parallelization and SIMD execution therefore target different levels of the hardware execution model. As such, SIMD optimizations can be applied independently of the chosen threading strategy and serve to increase the amount of useful work performed per core. This combination allows both forms of parallelism to complement one another, improving overall scalability when the simulation is executed on multicore CPUs.
 
 
 \bibliographystyle{plain}
