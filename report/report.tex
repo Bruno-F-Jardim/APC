@@ -278,6 +278,37 @@ Table \ref{tab:phase3} presents the results after enabling SIMD vectorization. B
 \end{tabular}
 \end{table}
 
+Table \ref{tab:phase4} presents the results for shared memory parallelism using OpenMP. The experiments show significant speedups as the number of threads increases, utilizing the multicore architecture effectively. The results also demonstrate good scalability for larger problem sizes (N=100000 and N=500000), although diminishing returns are observed at higher thread counts due to synchronization overhead and memory bandwidth saturation.
+
+\begin{table}[h]
+\centering
+\caption{Phase 4: Shared Memory Parallelism (OpenMP)}
+\label{tab:phase4}
+\begin{tabular}{|l|l|l|l|l|l|l|}
+\hline
+\textbf{N} & \textbf{Threads} & \textbf{Best (s)} & \textbf{Mean (s)} & \textbf{Speedup} & \textbf{IPC} & \textbf{L1 Miss \%} \\ \hline
+50000 & 5 & 117.291 & 117.580 & 4.60 & 0.70 & 8.94\% \\ \hline
+50000 & 10 & 55.857 & 56.109 & 9.66 & 0.70 & 9.15\% \\ \hline
+50000 & 16 & 53.458 & 54.043 & 10.09 & 0.51 & 8.71\% \\ \hline
+50000 & 24 & 48.032 & 48.399 & 11.23 & 0.37 & 8.46\% \\ \hline
+50000 & 32 & 21.604 & 23.124 & 24.98 & 0.67 & 7.65\% \\ \hline
+100000 & 5 & 460.053 & 460.887 & - & 0.70 & 9.10\% \\ \hline
+100000 & 10 & 212.567 & 213.361 & - & 0.70 & 9.10\% \\ \hline
+100000 & 16 & 198.754 & 201.962 & - & 0.50 & 8.86\% \\ \hline
+100000 & 24 & 182.125 & 183.011 & - & 0.37 & 8.64\% \\ \hline
+100000 & 32 & 68.013 & 69.930 & - & 0.67 & 7.89\% \\ \hline
+500000 & 16 & 1617.962 & 1617.962 & - & - & - \\ \hline
+
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/time_plot.png}
+  \caption{Execution Time vs Number of Threads (Log Scale)}
+  \Description{Execution Time vs Number of Threads (Log Scale)}
+  \label{fig:time_plot}
+\end{figure}
 
 \bibliographystyle{plain}
 \bibliography{refs.bib}

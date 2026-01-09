@@ -1,0 +1,18 @@
+# started on Fri Jan  9 15:59:13 2026
+
+
+ Performance counter stats for './build/simulate 100000 3600 36000':
+
+ 5,707,593,018,459      cycles                                                        (44.78%)
+ 3,837,900,447,166      instructions              #    0.67  insn per cycle                                              (60.85%)
+     2,232,762,725      cache-references                                              (59.18%)
+         6,543,000      cache-misses              #    0.293 % of all cache refs      (60.91%)
+    55,826,468,758      L1-dcache-load-misses     #    7.89% of all L1-dcache hits    (63.91%)
+   707,246,219,407      L1-dcache-loads                                               (38.38%)
+
+      74.386858219 seconds time elapsed
+
+    1940.533802000 seconds user
+       0.433993000 seconds sys
+
+
