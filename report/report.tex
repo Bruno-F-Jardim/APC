@@ -215,6 +215,85 @@ void PhysicsEngine::integrateStep(SoABodies& bodies, double dt) {
 
 While SIMD vectorization improves single-core performance by exploiting data-level parallelism within individual loops, it does not address parallelism across multiple cores. Thread-level parallelization and SIMD execution therefore target different levels of the hardware execution model. As such, SIMD optimizations can be applied independently of the chosen threading strategy and serve to increase the amount of useful work performed per core. This combination allows both forms of parallelism to complement one another, improving overall scalability when the simulation is executed on multicore CPUs.
 
+\section{Parallel Implementation}
+
+The parallel implementation builds on the sequential baseline by introducing shared-memory parallelism using OpenMP. Rather than restructuring the algorithm, parallelism is applied to the main phases of the time-stepping procedure: acceleration reset, force computation, and state update. These phases are executed within a single parallel region, allowing threads to be reused across multiple work-sharing constructs and reducing parallel region overhead. As such, the implementation combines thread-level parallelism across bodies with data-level parallelism inside the force computation.
+
+\begin{lstlisting}[language=C++]
+void PhysicsEngine::integrateStep(SoABodies& bodies, double dt) {
+    const double G = 6.67430e-11;
+    size_t n = bodies.size();
+
+    #pragma omp parallel
+    {
+        // Reset accelerations
+        #pragma omp for schedule(static)
+        for (size_t i = 0; i < n; ++i) {
+            bodies.acc_x[i] = 0.0;
+            bodies.acc_y[i] = 0.0;
+            bodies.acc_z[i] = 0.0;
+        }
+
+        #pragma omp for schedule(static)
+        for (size_t i = 0; i < n; ++i) {
+            double ax = 0.0, ay = 0.0, az = 0.0;
+
+            double px = bodies.pos_x[i];
+            double py = bodies.pos_y[i];
+            double pz = bodies.pos_z[i];
+
+            #pragma omp simd reduction(+:ax, ay, az)
+            for (size_t j = 0; j < n; ++j) {
+                // if (i == j) continue; removed to optimize performance
+                
+                double rx = bodies.pos_x[j] - px;
+                double ry = bodies.pos_y[j] - py;
+                double rz = bodies.pos_z[j] - pz;
+                
+                double distSq = rx * rx + ry * ry + rz * rz + 1e-9;
+                double inv_dist = 1.0 / std::sqrt(distSq);
+                double inv_dist3 = inv_dist * inv_dist * inv_dist;
+                double factor = G * bodies.mass[j] * inv_dist3;
+                ax += factor * rx;
+                ay += factor * ry;
+                az += factor * rz;
+                
+            }
+            bodies.acc_x[i] += ax;
+            bodies.acc_y[i] += ay;
+            bodies.acc_z[i] += az;
+        }
+
+        #pragma omp for schedule(static)
+        for (size_t i = 0; i < n; ++i) {
+            bodies.vel_x[i] += bodies.acc_x[i] * dt;
+            bodies.vel_y[i] += bodies.acc_y[i] * dt;
+            bodies.vel_z[i] += bodies.acc_z[i] * dt;
+            
+            bodies.pos_x[i] += bodies.vel_x[i] * dt;
+            bodies.pos_y[i] += bodies.vel_y[i] * dt;
+            bodies.pos_z[i] += bodies.vel_z[i] * dt;
+        }
+    }
+}
+\end{lstlisting}
+
+
+\subsection{Parallelization Strategy}
+
+The primary source of parallelism is the outer loop of the force computation, where each iteration computes the total acceleration acting on a single body. This loop is parallelized using an OpenMP work-sharing construct, assigning distinct bodies to different threads. Since each iteration accumulates forces independently into local variables, no synchronization is required within the inner loop.
+
+A single parallel region is used to cover all major computation phases within a time step. Inside this region, multiple \texttt{for} constructs distribute work for acceleration reset, force computation, and state updates. A static scheduling policy is employed, as the workload per iteration is uniform and predictable. This choice reduces scheduling overhead and provides good load balance without requiring dynamic scheduling or task-based parallelism.
+
+\subsection{Shared Memory Considerations}
+
+The implementation follows a shared-memory model in which all threads access the same particle data arrays. During the force computation, threads read shared position and mass data while writing only to private acceleration entries, which avoids data races and the need for synchronization. This access pattern is well suited to OpenMP-style parallelism, although scalability can still be influenced by memory bandwidth and cache coherence effects as thread count increases.
+
+\subsection{Memory and Cache Behavior}
+
+Performance is strongly affected by how particle data is accessed in memory. The structure-of-arrays layout improves spatial locality and enables more efficient cache usage during the force computation. Writing acceleration data to distinct array elements reduces false sharing, but cache line alignment and memory traffic remain relevant factors, particularly on systems with many cores.
+
+
 
 \bibliographystyle{plain}
 \bibliography{refs.bib}
