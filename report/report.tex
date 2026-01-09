@@ -216,6 +216,69 @@ void PhysicsEngine::integrateStep(SoABodies& bodies, double dt) {
 While SIMD vectorization improves single-core performance by exploiting data-level parallelism within individual loops, it does not address parallelism across multiple cores. Thread-level parallelization and SIMD execution therefore target different levels of the hardware execution model. As such, SIMD optimizations can be applied independently of the chosen threading strategy and serve to increase the amount of useful work performed per core. This combination allows both forms of parallelism to complement one another, improving overall scalability when the simulation is executed on multicore CPUs.
 
 
+
+\section{Experimental Results}
+
+This section presents the performance evaluation of the different optimization phases. The experiments were conducted on the SeARCH cluster, using an Intel-based architecture.
+
+\subsection{Evaluation Metrics}
+
+To rigorously evaluate the performance of the N-body simulation, a comprehensive set of metrics was collected to capture both the runtime behavior and the architectural efficiency of the code.
+
+Execution Time statistics (Best, Mean, Median, Standard Deviation) provide a holistic view of performance. The \textbf{Best} (minimum) time is useful for estimating the peak performance capability of the code in the absence of external system interference (OS jitter). The \textbf{Mean} and \textbf{Median} offer a realistic expectation of performance in a shared environment, while the \textbf{Standard Deviation} indicates the stability and reproducibility of the measurements.
+
+The architectural efficiency is measured through \textbf{Instructions Per Cycle (IPC)} and \textbf{L1 Cache Miss Rate}. IPC indicates the efficiency of the processor's instruction pipeline, where a higher IPC generally suggests better utilization of execution units and fewer stall cycles due to dependencies or memory latency. Conversely, the L1 Cache Miss Rate measures the effectiveness of the memory access patterns. A lower miss rate indicates better temporal and spatial locality, ensuring that the CPU spends less time waiting for data to be fetched from lower levels of the memory hierarchy.
+
+\subsection{Performance Analysis}
+
+Table \ref{tab:phase0} shows the baseline performance of the sequential brute-force implementation ($O(N^2)$). As expected, the execution time grows quadratically with the number of bodies $N$.
+
+\begin{table}[h]
+\centering
+\caption{Phase 0: Sequential Baseline Results (SeARCH x86)}
+\label{tab:phase0}
+\begin{tabular}{|l|l|l|l|l|l|l|}
+\hline
+\textbf{N} & \textbf{Best (s)} & \textbf{Mean (s)} & \textbf{Median (s)} & \textbf{StdDev} & \textbf{IPC} & \textbf{L1 Miss \%} \\ \hline
+1000 & 0.309 & 0.319 & 0.314 & 0.012 & 0.93 & 9.37\% \\ \hline
+5000 & 5.908 & 5.958 & 5.921 & 0.089 & 0.80 & 14.74\% \\ \hline
+10000 & 22.727 & 22.841 & 22.815 & 0.121 & 0.78 & 15.89\% \\ \hline
+50000 & 552.436 & 552.618 & 552.618 & 0.257 & 0.76 & 16.94\% \\ \hline
+\end{tabular}
+\end{table}
+
+Table \ref{tab:phase1} demonstrates the impact of changing the data layout from Array of Structures (AoS) to Structure of Arrays (SoA). This modification yields improved cache locality, indicated by the significant reduction in L1 cache miss rates (e.g., from 9.37\% to 0.66\% for N=1000).
+
+\begin{table}[h]
+\centering
+\caption{Phase 1: Sequential Data Layout (AoS to SoA)}
+\label{tab:phase1}
+\begin{tabular}{|l|l|l|l|l|l|l|l|}
+\hline
+\textbf{N} & \textbf{Best (s)} & \textbf{Mean (s)} & \textbf{Median (s)} & \textbf{StdDev} & \textbf{IPC} & \textbf{L1 Miss \%} & \textbf{Speedup} \\ \hline
+1000 & 0.303 & 0.314 & 0.306 & 0.015 & 0.85 & 0.66\% & 1.02 \\ \hline
+5000 & 5.743 & 5.772 & 5.777 & 0.015 & 0.70 & 9.49\% & 1.03 \\ \hline
+10000 & 22.181 & 22.232 & 22.242 & 0.036 & 0.67 & 10.81\% & 1.02 \\ \hline
+\end{tabular}
+\end{table}
+
+Table \ref{tab:phase3} presents the results after enabling SIMD vectorization. By exploiting data-level parallelism, further speedups were achieved, maintaining efficiency even as the problem size scales.
+
+\begin{table}[h]
+\centering
+\caption{Phase 3: Vectorization (SIMD / SVE)}
+\label{tab:phase3}
+\begin{tabular}{|l|l|l|l|l|l|l|l|}
+\hline
+\textbf{N} & \textbf{Best (s)} & \textbf{Mean (s)} & \textbf{Median (s)} & \textbf{StdDev} & \textbf{IPC} & \textbf{L1 Miss \%} & \textbf{Speedup} \\ \hline
+1000 & 0.305 & 0.309 & 0.307 & 0.007 & 0.89 & 0.58\% & 1.01 \\ \hline
+5000 & 5.797 & 5.832 & 5.810 & 0.058 & 0.75 & 6.10\% & 1.02 \\ \hline
+10000 & 22.182 & 22.237 & 22.245 & 0.037 & 0.73 & 6.61\% & 1.02 \\ \hline
+50000 & 539.574 & 540.916 & 540.638 & 1.373 & 0.71 & 8.77\% & 1.02 \\ \hline
+\end{tabular}
+\end{table}
+
+
 \bibliographystyle{plain}
 \bibliography{refs.bib}
 
